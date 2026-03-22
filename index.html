@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NARO 번역기</title>
+<link rel="manifest" href="manifest.json">
+<style>
+body { font-family:sans-serif; background:#111; color:#fff; text-align:center; padding:40px;}
+textarea { width:90%; height:120px; margin:10px;}
+button { padding:10px; margin:5px;}
+.result { margin-top:20px;}
+</style>
+</head>
+<body>
+<h1>🔥 NARO 번역기</h1>
+<textarea id="input"></textarea><br>
+<button onclick="toNaro()">➡️ 나로어</button>
+<button onclick="toKorean()">⬅️ 한국어</button>
+<button onclick="copy()">📋 복사</button>
+<div class="result" id="output"></div>
+
+<script>
+const MAP = {"ㄱ":"𐔉","ㅏ":"𐔀","ㄴ":"𐔋"};
+const REV = {"𐔉":"ㄱ","𐔀":"ㅏ","𐔋":"ㄴ"};
+
+function toNaro(){
+ let t=input.value;
+ let r="";
+ for(let c of t){ r+= "["+(MAP[c]||c)+"]"; }
+ output.innerText=r;
+}
+
+function toKorean(){
+ let tokens=input.value.match(/\[(.*?)\]/g)||[];
+ let r="";
+ for(let t of tokens){
+  let c=t.replace(/[\[\]]/g,"");
+  r+=REV[c]||"";
+ }
+ output.innerText=r;
+}
+
+function copy(){
+ navigator.clipboard.writeText(output.innerText);
+ alert("복사 완료!");
+}
+
+if ('serviceWorker' in navigator) {
+ navigator.serviceWorker.register('sw.js');
+}
+</script>
+</body>
+</html>
