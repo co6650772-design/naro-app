@@ -13,12 +13,8 @@ body {
   font-family: sans-serif;
 }
 
-h1 {
-  margin-top: 40px;
-}
-
 textarea {
-  width: 80%;
+  width: 85%;
   height: 120px;
   margin: 20px 0;
   border-radius: 10px;
@@ -27,7 +23,7 @@ textarea {
 }
 
 button {
-  margin: 10px;
+  margin: 8px;
   padding: 10px 20px;
   border-radius: 20px;
   border: none;
@@ -38,6 +34,12 @@ button {
   margin-top: 20px;
   font-size: 20px;
 }
+
+#pronounce {
+  margin-top: 10px;
+  font-size: 16px;
+  color: #aaa;
+}
 </style>
 </head>
 
@@ -47,58 +49,123 @@ button {
 
 <textarea id="input" placeholder="텍스트 입력..."></textarea><br>
 
-<button onclick="convert()">➡️ 나로어</button>
-<button onclick="resetText()">↩️ 초기화</button>
+<button onclick="toNaro()">➡️ 나로어</button>
+<button onclick="toKorean()">⬅️ 한국어</button>
 <button onclick="copyText()">📋 복사</button>
+<button onclick="resetText()">↩️ 초기화</button>
 
 <div id="output"></div>
+<div id="pronounce"></div>
 
 <script>
+// ================== 매핑 ==================
+const map = {
+  // 자음
+  "ㄱ":["𐔉","카르"], "ㄲ":["𐔉𐔉","카카르"],
+  "ㄴ":["𐔋","나르"], "ㄷ":["𐔌","다르"], "ㄸ":["𐔌𐔌","다다르"],
+  "ㄹ":["𐔎","라르"], "ㅁ":["𐔏","마르"], "ㅂ":["𐔐","바르"], "ㅃ":["𐔐𐔐","바바르"],
+  "ㅅ":["𐔒","사르"], "ㅆ":["𐔒𐔒","사사르"], "ㅇ":["𐔘","응르"],
+  "ㅈ":["𐔕","자르"], "ㅉ":["𐔕𐔕","자자르"], "ㅊ":["𐔖","차르"],
+  "ㅋ":["𐔆","카엔"], "ㅌ":["𐔍","타르"], "ㅍ":["𐔑","파르"], "ㅎ":["𐔔","하르"],
+
+  // 모음
+  "ㅏ":["𐔀","아르"], "ㅑ":["𐔈𐔀","에라"], "ㅓ":["𐔃","오르"],
+  "ㅕ":["𐔈𐔃","에로"], "ㅗ":["𐔊","우론"], "ㅛ":["𐔈𐔊","에룬"],
+  "ㅜ":["𐔄","우르"], "ㅠ":["𐔈𐔄","에루"], "ㅡ":["𐔈","에르"],
+  "ㅣ":["𐔂","이르"], "ㅐ":["𐔅","아엔"], "ㅔ":["𐔁","엔"],
+  "ㅚ":["𐔊𐔂","우이르"], "ㅟ":["𐔄𐔂","우이르"], "ㅢ":["𐔈𐔂","에이르"],
+  "ㅒ":["𐔈𐔅","에엔"], "ㅖ":["𐔈𐔁","에네"],
+  "ㅘ":["𐔊𐔀","우아"], "ㅙ":["𐔊𐔅","우엔"], "ㅝ":["𐔄𐔃","우로"]
+};
+
+// 영어 매핑
+const engMap = {
+  "a":"ㅏ","b":"ㅂ","c":"ㄱ","d":"ㄷ","e":"ㅔ","f":"ㅍ","g":"ㅗ","h":"ㅎ",
+  "i":"ㅣ","j":"ㅊ","k":"ㅋ","l":"ㄹ","m":"ㅁ","n":"ㄴ","o":"ㅓ","p":"ㅍ",
+  "q":"ㅋ","r":"ㄹ","s":"ㅅ","t":"ㅌ","u":"ㅜ","v":"ㅂ","w":"ㅜ",
+  "x":"ㅋ","y":"ㅡ","z":"ㅈ"
+};
+
+// 역변환용
+const reverse = {};
+for (let k in map) {
+  reverse[map[k][0]] = k;
+}
+
+// ================== 한글 분해 ==================
 const CHO = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
 const JUNG = ["ㅏ","ㅑ","ㅓ","ㅕ","ㅗ","ㅛ","ㅜ","ㅠ","ㅡ","ㅣ","ㅐ","ㅔ","ㅚ","ㅟ","ㅢ","ㅒ","ㅖ","ㅘ","ㅙ","ㅝ"];
 const JONG = ["","ㄱ","ㄲ","ㄳ","ㄴ","ㄵ","ㄶ","ㄷ","ㄹ","ㄺ","ㄻ","ㄼ","ㄽ","ㄾ","ㄿ","ㅀ","ㅁ","ㅂ","ㅄ","ㅅ","ㅆ","ㅇ","ㅈ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
 
-const NARO = {
-  "ㄱ":"𐔉","ㄴ":"𐔋","ㄷ":"𐔌","ㄹ":"𐔎","ㅁ":"𐔏","ㅂ":"𐔐",
-  "ㅅ":"𐔒","ㅇ":"𐔘","ㅈ":"𐔕","ㅊ":"𐔖","ㅋ":"𐔆","ㅌ":"𐔍","ㅍ":"𐔑","ㅎ":"𐔔",
-  "ㅏ":"𐔀","ㅓ":"𐔃","ㅗ":"𐔊","ㅜ":"𐔄","ㅡ":"𐔈","ㅣ":"𐔂","ㅐ":"𐔅","ㅔ":"𐔁"
-};
-
-function convert() {
-  const input = document.getElementById("input").value;
+// ================== → 나로어 ==================
+function toNaro() {
+  const input = document.getElementById("input").value.toLowerCase();
   let result = "";
+  let pron = "";
 
   for (let char of input) {
-    const code = char.charCodeAt(0);
+    let code = char.charCodeAt(0);
 
+    // 한글
     if (code >= 44032 && code <= 55203) {
-      const base = code - 44032;
-      const cho = Math.floor(base / 588);
-      const jung = Math.floor((base % 588) / 28);
-      const jong = base % 28;
+      let base = code - 44032;
+      let cho = CHO[Math.floor(base / 588)];
+      let jung = JUNG[Math.floor((base % 588) / 28)];
+      let jong = JONG[base % 28];
 
-      const c = CHO[cho];
-      const j = JUNG[jung];
-      const t = JONG[jong];
+      [cho, jung, jong].forEach(j => {
+        if (!j) return;
+        result += map[j][0];
+        pron += map[j][1] + " ";
+      });
+    }
 
-      result += (NARO[c] || c) + (NARO[j] || j) + (NARO[t] || "");
-    } else {
+    // 영어
+    else if (engMap[char]) {
+      let k = engMap[char];
+      result += map[k][0];
+      pron += map[k][1] + " ";
+    }
+
+    // 자모
+    else if (map[char]) {
+      result += map[char][0];
+      pron += map[char][1] + " ";
+    }
+
+    else {
       result += char;
+      pron += char + " ";
     }
   }
 
   document.getElementById("output").innerText = result;
+  document.getElementById("pronounce").innerText = "[" + pron.trim() + "]";
+}
+
+// ================== → 한국어 ==================
+function toKorean() {
+  const input = document.getElementById("input").value;
+  let result = input;
+
+  for (let key in reverse) {
+    result = result.split(key).join(reverse[key]);
+  }
+
+  document.getElementById("output").innerText = result;
+  document.getElementById("pronounce").innerText = "(역변환)";
+}
+
+// ================== 기타 ==================
+function copyText() {
+  navigator.clipboard.writeText(document.getElementById("output").innerText);
+  alert("복사 완료!");
 }
 
 function resetText() {
-  document.getElementById("input").value = "";
-  document.getElementById("output").innerText = "";
-}
-
-function copyText() {
-  const text = document.getElementById("output").innerText;
-  navigator.clipboard.writeText(text);
-  alert("복사 완료!");
+  input.value = "";
+  output.innerText = "";
+  pronounce.innerText = "";
 }
 </script>
 
