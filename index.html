@@ -9,7 +9,7 @@
 body { background:#000; color:#fff; text-align:center; font-family:sans-serif; }
 textarea { width:85%; height:120px; margin:20px 0; border-radius:10px; padding:10px; font-size:16px; }
 button { margin:8px; padding:10px 20px; border-radius:20px; border:none; font-size:16px; }
-#output { margin-top:20px; font-size:20px; }
+#output { margin-top:20px; font-size:20px; word-break:break-all; }
 #pronounce { margin-top:10px; font-size:16px; color:#aaa; }
 #guide { display:none; margin-top:20px; text-align:left; padding:15px; background:#111; border-radius:10px; }
 input { width:80%; padding:8px; border-radius:10px; border:none; margin-bottom:10px; }
@@ -18,11 +18,12 @@ input { width:80%; padding:8px; border-radius:10px; border:none; margin-bottom:1
 
 <body>
 
-<h1>🔥 NARO 번역기 (최종)</h1>
+<h1>🔥 NARO 번역기 (완전체)</h1>
 
 <textarea id="input" placeholder="텍스트 입력..."></textarea><br>
 
 <button onclick="toNaro()">➡️ 나로어</button>
+<button onclick="toNaroEng()">🔤 영어 전용</button>
 <button onclick="toKorean()">⬅️ 한국어 복원</button>
 <button onclick="toEnglish()">🔤 영어 복원</button>
 <button onclick="toggleGuide()">📖 문자표</button><br>
@@ -77,22 +78,26 @@ function buildReverse() {
   reverseMap = {};
   reverseEngMap = {};
 
-  for (let k in map) {
-    reverseMap[map[k][0]] = k;
-  }
-
+  for (let k in map) reverseMap[map[k][0]] = k;
   for (let e in engMap) {
     let k = engMap[e];
-    reverseEngMap[map[k][0]] = e;
+    reverseEngMap[map[k][0]+"•"] = e;
   }
 }
 
-// ===== 번역 =====
+// ===== 나로 변환 =====
 function toNaro() {
   const input = document.getElementById("input").value.toLowerCase();
-  let result = "", pron = "";
+  let result="", pron="";
 
   for (let char of input) {
+
+    if (char === " ") {
+      result += " | ";
+      pron += "/ ";
+      continue;
+    }
+
     let code = char.charCodeAt(0);
 
     if (code >= 44032 && code <= 55203) {
@@ -103,17 +108,17 @@ function toNaro() {
 
       [cho, jung, jong].forEach(j=>{
         if (!j) return;
-        result += map[j][0];
+        result += map[j][0] + " ";
         pron += map[j][1] + " ";
       });
     }
     else if (engMap[char]) {
       let k = engMap[char];
-      result += map[k][0];
+      result += map[k][0] + " ";
       pron += map[k][1] + " ";
     }
     else if (map[char]) {
-      result += map[char][0];
+      result += map[char][0] + " ";
       pron += map[char][1] + " ";
     }
     else {
@@ -123,13 +128,37 @@ function toNaro() {
   }
 
   output.innerText = result;
-  pronounce.innerText = "[" + pron.trim() + "]";
+  pronounce.innerText = "["+pron.trim()+"]";
+}
+
+// ===== 영어 전용 =====
+function toNaroEng() {
+  const input = document.getElementById("input").value.toLowerCase();
+  let result="";
+
+  for (let char of input) {
+    if (char === " ") {
+      result += " | ";
+      continue;
+    }
+    if (engMap[char]) {
+      let k = engMap[char];
+      result += map[k][0] + "• ";
+    } else {
+      result += char;
+    }
+  }
+
+  output.innerText = result;
+  pronounce.innerText = "(영어 전용)";
 }
 
 // ===== 한국어 복원 =====
 function toKorean() {
   buildReverse();
   let input = document.getElementById("input").value;
+
+  input = input.split(" | ").join(" ");
 
   let keys = Object.keys(reverseMap).sort((a,b)=>b.length-a.length);
   keys.forEach(k=>{
@@ -145,13 +174,15 @@ function toEnglish() {
   buildReverse();
   let input = document.getElementById("input").value;
 
+  input = input.split(" | ").join(" ");
+
   let keys = Object.keys(reverseEngMap).sort((a,b)=>b.length-a.length);
   keys.forEach(k=>{
     input = input.split(k).join(reverseEngMap[k]);
   });
 
   output.innerText = input;
-  pronounce.innerText = "(영어 복원)";
+  pronounce.innerText = "(영어 완벽 복원)";
 }
 
 // ===== 문자표 =====
@@ -170,7 +201,6 @@ function buildGuideData() {
 
 function toggleGuide() {
   const guide = document.getElementById("guide");
-
   if (guide.style.display === "none") {
     guide.style.display = "block";
     buildGuideData();
@@ -182,7 +212,7 @@ function toggleGuide() {
 
 function renderGuide(data) {
   document.getElementById("guideContent").innerHTML =
-    "<b>📖 전체 문자표</b><br><br>" + data.join("<br>");
+    "<b>📖 문자표</b><br><br>" + data.join("<br>");
 }
 
 function searchGuide() {
