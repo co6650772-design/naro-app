@@ -2,46 +2,25 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>NARO FINAL</title>
+<title>NARO ULTIMATE FINAL</title>
 
 <style>
-body {
-  background:#000;
-  color:#fff;
-  text-align:center;
-  font-family:sans-serif;
-}
+body { background:#000; color:#fff; text-align:center; font-family:sans-serif; }
 
-/* 🔥 입력창 줄임 */
 textarea {
-  width:75%;
-  height:80px;
-  margin:15px 0;
-  border-radius:10px;
-  padding:10px;
-  font-size:15px;
+  width:75%; height:80px; margin:15px 0;
+  border-radius:10px; padding:10px;
 }
 
 button {
-  margin:5px;
-  padding:8px 14px;
-  border-radius:20px;
-  border:none;
-  cursor:pointer;
+  margin:5px; padding:8px 14px;
+  border-radius:20px; border:none; cursor:pointer;
 }
 
-/* 출력 */
-#output {
-  margin-top:20px;
-  line-height:2.2;
-}
+#output { margin-top:20px; line-height:2.2; }
 
-/* 단어 */
-.word {
-  margin-right:18px;
-}
+.word { margin-right:18px; }
 
-/* 글자 */
 .charBox {
   display:inline-block;
   margin:3px;
@@ -50,12 +29,8 @@ button {
   background:#111;
 }
 
-/* 🔥 가로 정렬 */
-.inline {
-  display:inline;
-}
+.inline { display:inline; }
 
-/* 색 (글자 단위) */
 .c1{ color:#ff4d4d;}
 .c2{ color:#ffa64d;}
 .c3{ color:#ffff66;}
@@ -63,21 +38,11 @@ button {
 .c5{ color:#66ccff;}
 .c6{ color:#cc66ff;}
 
-.top {
-  font-size:11px;
-  color:#aaa;
-}
+.top { font-size:11px; color:#aaa; }
+.bottom { font-size:20px; }
 
-.bottom {
-  font-size:20px;
-}
+#pronounce { margin-top:10px; color:#aaa; }
 
-#pronounce {
-  margin-top:10px;
-  color:#aaa;
-}
-
-/* 문자표 */
 #guide {
   display:none;
   margin-top:20px;
@@ -97,7 +62,7 @@ input {
 
 <body>
 
-<h1>🔥 NARO FINAL</h1>
+<h1>🔥 NARO ULTIMATE FINAL</h1>
 
 <textarea id="input" placeholder="텍스트 입력"></textarea><br>
 
@@ -155,12 +120,12 @@ function getColor(i){
   return ["c1","c2","c3","c4","c5","c6"][i%6];
 }
 
-// ===== 한글 → 나로어 (가로) =====
+// ===== 한글 =====
 function toKor(){
   let words=input.value.split(" ");
-  let result="", pron="";
+  let result="", plain="", pron="";
 
-  words.forEach(word=>{
+  words.forEach((word,wIndex)=>{
     result+=`<span class="word">`;
 
     [...word].forEach((ch,i)=>{
@@ -177,7 +142,8 @@ function toKor(){
         result+=`<span class="charBox ${getColor(i)}">`;
 
         parts.forEach(p=>{
-          result+=`<span class="inline">${korMap[p]}</span>`;
+          result+=`<span>${korMap[p]}</span>`;
+          plain+=korMap[p];
           pron+=p+" ";
         });
 
@@ -186,18 +152,25 @@ function toKor(){
     });
 
     result+=`</span>`;
+
+    if(wIndex !== words.length-1){
+      result+=" ";
+      plain+=" ";
+    }
   });
 
   output.innerHTML=result;
+  output.dataset.copy = plain;
+
   pronounce.innerText="[ "+pron.trim()+" ]";
 }
 
 // ===== 영어 =====
 function toEng(){
   let words=input.value.toLowerCase().split(" ");
-  let result="";
+  let result="", plain="";
 
-  words.forEach(word=>{
+  words.forEach((word,wIndex)=>{
     result+=`<span class="word">`;
 
     [...word].forEach((ch,i)=>{
@@ -207,13 +180,22 @@ function toEng(){
           <div class="top">${ch}</div>
           <div class="bottom">${engMap[ch]}</div>
         </span>`;
+        plain+=engMap[ch];
       }
     });
 
     result+=`</span>`;
+
+    if(wIndex !== words.length-1){
+      result+=" ";
+      plain+=" ";
+    }
   });
 
   output.innerHTML=result;
+  output.dataset.copy = plain;
+
+  pronounce.innerText="(영어)";
 }
 
 // ===== 복원 =====
@@ -233,7 +215,8 @@ function restoreEng(){
 
 // ===== 복사 =====
 function copyText(){
-  navigator.clipboard.writeText(output.innerText);
+  const text = output.dataset.copy || output.innerText;
+  navigator.clipboard.writeText(text);
   alert("복사 완료!");
 }
 
