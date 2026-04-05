@@ -2,53 +2,73 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>NARO 번역기 FINAL</title>
+<title>NARO ULTIMATE</title>
 
 <style>
 body { background:#000; color:#fff; text-align:center; font-family:sans-serif; }
 
 textarea {
   width:85%; height:120px; margin:20px 0;
-  border-radius:10px; padding:10px; font-size:16px;
+  border-radius:10px; padding:10px;
 }
 
 button {
-  margin:6px; padding:10px 16px;
-  border-radius:20px; border:none;
-  cursor:pointer;
+  margin:5px; padding:10px 15px;
+  border-radius:20px; border:none; cursor:pointer;
 }
 
-#output { margin-top:20px; font-size:22px; line-height:1.8; }
+#output { margin-top:20px; line-height:2.2; }
+
+.word { margin-right:18px; }
+
+.charBox {
+  display:inline-block;
+  margin:3px;
+  padding:6px;
+  border-radius:8px;
+  background:#111;
+}
+
+.stack {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+.c1{ color:#ff4d4d;}
+.c2{ color:#ffa64d;}
+.c3{ color:#ffff66;}
+.c4{ color:#66ff66;}
+.c5{ color:#66ccff;}
+.c6{ color:#cc66ff;}
+
+.top { font-size:11px; color:#aaa; }
+.bottom { font-size:22px; }
+
 #pronounce { margin-top:10px; color:#aaa; }
 
-/* 🌈 색 */
-.colors span:nth-child(6n+1){ color:#ff4d4d; }
-.colors span:nth-child(6n+2){ color:#ffa64d; }
-.colors span:nth-child(6n+3){ color:#ffff66; }
-.colors span:nth-child(6n+4){ color:#66ff66; }
-.colors span:nth-child(6n+5){ color:#66ccff; }
-.colors span:nth-child(6n+6){ color:#cc66ff; }
+#guide {
+  display:none;
+  margin-top:20px;
+  background:#111;
+  padding:10px;
+  border-radius:10px;
+}
 
-.charBox { display:inline-block; margin:3px; text-align:center; }
-.top { font-size:12px; color:#aaa; }
-.bottom { font-size:20px; }
-
-/* 문자표 */
-#guide { display:none; margin-top:20px; padding:15px; background:#111; border-radius:10px; }
 input { width:80%; padding:8px; border-radius:10px; border:none; }
 </style>
 </head>
 
 <body>
 
-<h1>🔥 NARO 번역기 FINAL</h1>
+<h1>🔥 NARO ULTIMATE</h1>
 
-<textarea id="input" placeholder="텍스트 입력"></textarea><br>
+<textarea id="input" placeholder="입력"></textarea><br>
 
-<button onclick="toNaroKor()">한글 → 나로어</button>
-<button onclick="toNaroEng()">영어 → 나로어</button>
-<button onclick="toKorean()">⬅️ 한국어 복원</button>
-<button onclick="toEnglish()">🔤 영어 복원</button><br>
+<button onclick="toKor()">한글 → 나로어</button>
+<button onclick="toEng()">영어 → 나로어</button>
+<button onclick="restoreKor()">한국어 복원</button>
+<button onclick="restoreEng()">영어 복원</button><br>
 
 <button onclick="copyText()">📋 복사</button>
 <button onclick="toggleGuide()">📖 문자표</button>
@@ -62,126 +82,108 @@ input { width:80%; padding:8px; border-radius:10px; border:none; }
 </div>
 
 <script>
-// ===== 한글 분해 =====
+// ===== 기본 =====
 const CHO = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
 const JUNG = ["ㅏ","ㅐ","ㅑ","ㅒ","ㅓ","ㅔ","ㅕ","ㅖ","ㅗ","ㅘ","ㅙ","ㅚ","ㅛ","ㅜ","ㅝ","ㅞ","ㅟ","ㅠ","ㅡ","ㅢ","ㅣ"];
 const JONG = ["","ㄱ","ㄲ","ㄳ","ㄴ","ㄵ","ㄶ","ㄷ","ㄹ","ㄺ","ㄻ","ㄼ","ㄽ","ㄾ","ㄿ","ㅀ","ㅁ","ㅂ","ㅄ","ㅅ","ㅆ","ㅇ","ㅈ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
 
-// ===== 한글 나로어 =====
-const korMap = {
- "ㄱ":"𐔉","ㄲ":"𐔉𐔉","ㄴ":"𐔋","ㄷ":"𐔌","ㄸ":"𐔌𐔌","ㄹ":"𐔎",
- "ㅁ":"𐔏","ㅂ":"𐔐","ㅃ":"𐔐𐔐","ㅅ":"𐔒","ㅆ":"𐔒𐔒","ㅇ":"𐔘",
- "ㅈ":"𐔕","ㅉ":"𐔕𐔕","ㅊ":"𐔖","ㅋ":"𐔆","ㅌ":"𐔍","ㅍ":"𐔑","ㅎ":"𐔔",
+const korMap = { "ㄱ":"𐔉","ㄲ":"𐔉𐔉","ㄴ":"𐔋","ㄷ":"𐔌","ㄸ":"𐔌𐔌","ㄹ":"𐔎","ㅁ":"𐔏","ㅂ":"𐔐","ㅃ":"𐔐𐔐","ㅅ":"𐔒","ㅆ":"𐔒𐔒","ㅇ":"𐔘","ㅈ":"𐔕","ㅉ":"𐔕𐔕","ㅊ":"𐔖","ㅋ":"𐔆","ㅌ":"𐔍","ㅍ":"𐔑","ㅎ":"𐔔",
+"ㅏ":"𐔀","ㅐ":"𐔅","ㅑ":"𐔈𐔀","ㅒ":"𐔈𐔅","ㅓ":"𐔃","ㅔ":"𐔁","ㅕ":"𐔈𐔃","ㅖ":"𐔈𐔁","ㅗ":"𐔊","ㅘ":"𐔊𐔀","ㅙ":"𐔊𐔅","ㅚ":"𐔊𐔂","ㅛ":"𐔈𐔊","ㅜ":"𐔄","ㅝ":"𐔄𐔃","ㅞ":"𐔄𐔁","ㅟ":"𐔄𐔂","ㅠ":"𐔈𐔄","ㅡ":"𐔈","ㅢ":"𐔈𐔂","ㅣ":"𐔂" };
 
- "ㅏ":"𐔀","ㅐ":"𐔅","ㅑ":"𐔈𐔀","ㅒ":"𐔈𐔅",
- "ㅓ":"𐔃","ㅔ":"𐔁","ㅕ":"𐔈𐔃","ㅖ":"𐔈𐔁",
- "ㅗ":"𐔊","ㅘ":"𐔊𐔀","ㅙ":"𐔊𐔅","ㅚ":"𐔊𐔂",
- "ㅛ":"𐔈𐔊","ㅜ":"𐔄","ㅝ":"𐔄𐔃","ㅞ":"𐔄𐔁","ㅟ":"𐔄𐔂",
- "ㅠ":"𐔈𐔄","ㅡ":"𐔈","ㅢ":"𐔈𐔂","ㅣ":"𐔂"
+const engMap = {
+ a:"𐔀", b:"𐔁", c:"𐔂", d:"𐔃", e:"𐔄", f:"𐔅", g:"𐔆",
+ h:"𐔇", i:"𐔈", j:"𐔉", k:"𐔊", l:"𐔋", m:"𐔌", n:"𐔍",
+ o:"𐔎", p:"𐔏", q:"𐔐", r:"𐔑", s:"𐔒", t:"𐔓", u:"𐔔",
+ v:"𐔕", w:"𐔖", x:"𐔗", y:"𐔘", z:"𐔙"
 };
 
-// ===== 영어 나로어 =====
-const engNaro = {
- a:"𐔀", b:"𐔁", c:"𐔂", d:"𐔃", e:"𐔄",
- f:"𐔅", g:"𐔆", h:"𐔇", i:"𐔈", j:"𐔉",
- k:"𐔊", l:"𐔋", m:"𐔌", n:"𐔍", o:"𐔎",
- p:"𐔏", q:"𐔐", r:"𐔑", s:"𐔒", t:"𐔓",
- u:"𐔔", v:"𐔕", w:"𐔖", x:"𐔗", y:"𐔘",
- z:"𐔙"
-};
-
-// ===== 역매핑 =====
-let reverseKor = {};
-let reverseEng = {};
+let revKor={}, revEng={};
 
 function buildReverse(){
-  reverseKor = {};
-  reverseEng = {};
-
-  for(let k in korMap) reverseKor[korMap[k]] = k;
-  for(let e in engNaro) reverseEng[engNaro[e]] = e;
+  revKor={}; revEng={};
+  for(let k in korMap) revKor[korMap[k]]=k;
+  for(let e in engMap) revEng[engMap[e]]=e;
 }
 
-// ===== 한글 → 나로어 =====
-function toNaroKor(){
-  const text=input.value;
-  let out=`<div class="colors">`;
-  let pron="";
+function getColor(i){ return ["c1","c2","c3","c4","c5","c6"][i%6]; }
 
-  for(let ch of text){
+// ===== 한글 변환 =====
+function toKor(){
+  let words=input.value.split(" ");
+  let result="", pron="";
 
-    if(ch===" "){ out+=" "; pron+="/ "; continue; }
+  words.forEach(word=>{
+    result+=`<span class="word">`;
 
-    let code=ch.charCodeAt(0);
+    [...word].forEach((ch,i)=>{
+      let code=ch.charCodeAt(0);
 
-    if(code>=44032 && code<=55203){
-      let base=code-44032;
-      let cho=CHO[Math.floor(base/588)];
-      let jung=JUNG[Math.floor((base%588)/28)];
-      let jong=JONG[base%28];
+      if(code>=44032 && code<=55203){
+        let base=code-44032;
+        let cho=CHO[Math.floor(base/588)];
+        let jung=JUNG[Math.floor((base%588)/28)];
+        let jong=JONG[base%28];
 
-      [cho,jung,jong].forEach(j=>{
-        if(j && korMap[j]){
-          out+=`<span>${korMap[j]}</span>`;
-          pron+=j+" ";
-        }
-      });
-    }
-  }
+        let parts=[cho,jung,jong].filter(v=>v&&korMap[v]);
 
-  output.innerHTML=out+"</div>";
+        result+=`<span class="charBox ${getColor(i)}"><div class="stack">`;
+
+        parts.forEach(p=>{
+          result+=`<div>${korMap[p]}</div>`;
+          pron+=p+" ";
+        });
+
+        result+=`</div></span>`;
+      }
+    });
+
+    result+=`</span>`;
+  });
+
+  output.innerHTML=result;
   pronounce.innerText="[ "+pron.trim()+" ]";
 }
 
-// ===== 영어 → 나로어 =====
-function toNaroEng(){
-  const text=input.value.toLowerCase();
-  let out="";
-
-  for(let ch of text){
-
-    if(ch===" "){ out+=" "; continue; }
-
-    if(engNaro[ch]){
-      out+=`
-      <span class="charBox">
-        <div class="top">${ch}</div>
-        <div class="bottom colors"><span>${engNaro[ch]}</span></div>
-      </span>
-      `;
-    }
-  }
-
-  output.innerHTML=out;
-  pronounce.innerText="(영어 모드)";
-}
-
-// ===== 한국어 복원 =====
-function toKorean(){
-  buildReverse();
-  let txt=input.value;
+// ===== 영어 변환 =====
+function toEng(){
+  let words=input.value.toLowerCase().split(" ");
   let result="";
 
-  Object.keys(reverseKor).forEach(k=>{
-    txt=txt.split(k).join(reverseKor[k]);
+  words.forEach(word=>{
+    result+=`<span class="word">`;
+
+    [...word].forEach((ch,i)=>{
+      if(engMap[ch]){
+        result+=`
+        <span class="charBox ${getColor(i)}">
+          <div class="stack">
+            <div class="top">${ch}</div>
+            <div class="bottom">${engMap[ch]}</div>
+          </div>
+        </span>`;
+      }
+    });
+
+    result+=`</span>`;
   });
 
-  output.innerText=txt;
-  pronounce.innerText="(한국어 복원)";
+  output.innerHTML=result;
+  pronounce.innerText="(영어)";
 }
 
-// ===== 영어 복원 =====
-function toEnglish(){
+// ===== 복원 =====
+function restoreKor(){
   buildReverse();
   let txt=input.value;
-  let result="";
-
-  Object.keys(reverseEng).forEach(k=>{
-    txt=txt.split(k).join(reverseEng[k]);
-  });
-
+  for(let k in revKor){ txt=txt.split(k).join(revKor[k]); }
   output.innerText=txt;
-  pronounce.innerText="(영어 복원)";
+}
+
+function restoreEng(){
+  buildReverse();
+  let txt=input.value;
+  for(let k in revEng){ txt=txt.split(k).join(revEng[k]); }
+  output.innerText=txt;
 }
 
 // ===== 복사 =====
@@ -195,33 +197,20 @@ let guideData=[];
 
 function buildGuide(){
   guideData=[];
-  for(let k in korMap){
-    guideData.push(`${k} = ${korMap[k]}`);
-  }
-  for(let e in engNaro){
-    guideData.push(`${e} = ${engNaro[e]}`);
-  }
+  for(let k in korMap) guideData.push(k+" = "+korMap[k]);
+  for(let e in engMap) guideData.push(e+" = "+engMap[e]);
 }
 
 function toggleGuide(){
-  const g=document.getElementById("guide");
-  if(g.style.display==="none"){
-    g.style.display="block";
-    buildGuide();
-    renderGuide(guideData);
-  }else{
-    g.style.display="none";
-  }
-}
-
-function renderGuide(data){
-  guideContent.innerHTML=data.join("<br>");
+  guide.style.display = guide.style.display==="none" ? "block" : "none";
+  buildGuide();
+  guideContent.innerHTML=guideData.join("<br>");
 }
 
 function searchGuide(){
   let q=search.value.toLowerCase();
   let f=guideData.filter(v=>v.toLowerCase().includes(q));
-  renderGuide(f);
+  guideContent.innerHTML=f.join("<br>");
 }
 </script>
 
