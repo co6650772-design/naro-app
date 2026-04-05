@@ -6,61 +6,27 @@
 <title>NARO 번역기</title>
 
 <style>
-body {
-  background: #000;
-  color: #fff;
-  text-align: center;
-  font-family: sans-serif;
-}
-
-textarea {
-  width: 85%;
-  height: 120px;
-  margin: 20px 0;
-  border-radius: 10px;
-  padding: 10px;
-  font-size: 16px;
-}
-
-button {
-  margin: 8px;
-  padding: 10px 20px;
-  border-radius: 20px;
-  border: none;
-  font-size: 16px;
-}
-
-#output { margin-top: 20px; font-size: 20px; }
-#pronounce { margin-top: 10px; font-size: 16px; color: #aaa; }
-
-#guide {
-  display: none;
-  margin-top: 20px;
-  text-align: left;
-  padding: 15px;
-  background: #111;
-  border-radius: 10px;
-}
-
-input {
-  width: 80%;
-  padding: 8px;
-  border-radius: 10px;
-  border: none;
-  margin-bottom: 10px;
-}
+body { background:#000; color:#fff; text-align:center; font-family:sans-serif; }
+textarea { width:85%; height:120px; margin:20px 0; border-radius:10px; padding:10px; font-size:16px; }
+button { margin:8px; padding:10px 20px; border-radius:20px; border:none; font-size:16px; }
+#output { margin-top:20px; font-size:20px; }
+#pronounce { margin-top:10px; font-size:16px; color:#aaa; }
+#guide { display:none; margin-top:20px; text-align:left; padding:15px; background:#111; border-radius:10px; }
+input { width:80%; padding:8px; border-radius:10px; border:none; margin-bottom:10px; }
 </style>
 </head>
 
 <body>
 
-<h1>🔥 NARO 번역기 (완전판)</h1>
+<h1>🔥 NARO 번역기 (최종)</h1>
 
 <textarea id="input" placeholder="텍스트 입력..."></textarea><br>
 
 <button onclick="toNaro()">➡️ 나로어</button>
 <button onclick="toKorean()">⬅️ 한국어 복원</button>
+<button onclick="toEnglish()">🔤 영어 복원</button>
 <button onclick="toggleGuide()">📖 문자표</button><br>
+
 <button onclick="copyText()">📋 복사</button>
 <button onclick="resetText()">↩️ 초기화</button>
 
@@ -68,12 +34,12 @@ input {
 <div id="pronounce"></div>
 
 <div id="guide">
-  <input id="search" placeholder="검색 (예: ㄱ, a, 카르)" oninput="searchGuide()">
+  <input id="search" placeholder="검색 (ㄱ / A / 카르)" oninput="searchGuide()">
   <div id="guideContent"></div>
 </div>
 
 <script>
-// ===== 한글 분해 =====
+// ===== 기본 =====
 const CHO = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
 const JUNG = ["ㅏ","ㅐ","ㅑ","ㅒ","ㅓ","ㅔ","ㅕ","ㅖ","ㅗ","ㅘ","ㅙ","ㅚ","ㅛ","ㅜ","ㅝ","ㅞ","ㅟ","ㅠ","ㅡ","ㅢ","ㅣ"];
 const JONG = ["","ㄱ","ㄲ","ㄳ","ㄴ","ㄵ","ㄶ","ㄷ","ㄹ","ㄺ","ㄻ","ㄼ","ㄽ","ㄾ","ㄿ","ㅀ","ㅁ","ㅂ","ㅄ","ㅅ","ㅆ","ㅇ","ㅈ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
@@ -103,17 +69,21 @@ const engMap = {
  "x":"ㅋ","y":"ㅡ","z":"ㅈ"
 };
 
-// ===== 문자표 데이터 =====
-let guideData = [];
+// ===== 역매핑 =====
+let reverseMap = {};
+let reverseEngMap = {};
 
-function buildGuideData() {
-  guideData = [];
+function buildReverse() {
+  reverseMap = {};
+  reverseEngMap = {};
+
   for (let k in map) {
-    guideData.push(`${k} = ${map[k][0]} (${map[k][1]})`);
+    reverseMap[map[k][0]] = k;
   }
+
   for (let e in engMap) {
     let k = engMap[e];
-    guideData.push(`${e.toUpperCase()} = ${map[k][0]} (${map[k][1]})`);
+    reverseEngMap[map[k][0]] = e;
   }
 }
 
@@ -156,11 +126,10 @@ function toNaro() {
   pronounce.innerText = "[" + pron.trim() + "]";
 }
 
-// ===== 복원 =====
+// ===== 한국어 복원 =====
 function toKorean() {
+  buildReverse();
   let input = document.getElementById("input").value;
-  let reverseMap = {};
-  for (let k in map) reverseMap[map[k][0]] = k;
 
   let keys = Object.keys(reverseMap).sort((a,b)=>b.length-a.length);
   keys.forEach(k=>{
@@ -168,10 +137,37 @@ function toKorean() {
   });
 
   output.innerText = input;
-  pronounce.innerText = "(복원 완료)";
+  pronounce.innerText = "(한국어 복원)";
 }
 
-// ===== 문자표 + 검색 =====
+// ===== 영어 복원 =====
+function toEnglish() {
+  buildReverse();
+  let input = document.getElementById("input").value;
+
+  let keys = Object.keys(reverseEngMap).sort((a,b)=>b.length-a.length);
+  keys.forEach(k=>{
+    input = input.split(k).join(reverseEngMap[k]);
+  });
+
+  output.innerText = input;
+  pronounce.innerText = "(영어 복원)";
+}
+
+// ===== 문자표 =====
+let guideData = [];
+
+function buildGuideData() {
+  guideData = [];
+  for (let k in map) {
+    guideData.push(`${k} = ${map[k][0]} (${map[k][1]})`);
+  }
+  for (let e in engMap) {
+    let k = engMap[e];
+    guideData.push(`${e.toUpperCase()} = ${map[k][0]} (${map[k][1]})`);
+  }
+}
+
 function toggleGuide() {
   const guide = document.getElementById("guide");
 
@@ -191,11 +187,7 @@ function renderGuide(data) {
 
 function searchGuide() {
   const q = document.getElementById("search").value.toLowerCase();
-
-  const filtered = guideData.filter(line =>
-    line.toLowerCase().includes(q)
-  );
-
+  const filtered = guideData.filter(line => line.toLowerCase().includes(q));
   renderGuide(filtered);
 }
 
