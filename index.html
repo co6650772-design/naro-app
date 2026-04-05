@@ -30,16 +30,8 @@ button {
   font-size: 16px;
 }
 
-#output {
-  margin-top: 20px;
-  font-size: 20px;
-}
-
-#pronounce {
-  margin-top: 10px;
-  font-size: 16px;
-  color: #aaa;
-}
+#output { margin-top: 20px; font-size: 20px; }
+#pronounce { margin-top: 10px; font-size: 16px; color: #aaa; }
 
 #guide {
   display: none;
@@ -49,12 +41,20 @@ button {
   background: #111;
   border-radius: 10px;
 }
+
+input {
+  width: 80%;
+  padding: 8px;
+  border-radius: 10px;
+  border: none;
+  margin-bottom: 10px;
+}
 </style>
 </head>
 
 <body>
 
-<h1>🔥 NARO 번역기</h1>
+<h1>🔥 NARO 번역기 (완전판)</h1>
 
 <textarea id="input" placeholder="텍스트 입력..."></textarea><br>
 
@@ -67,37 +67,33 @@ button {
 <div id="output"></div>
 <div id="pronounce"></div>
 
-<div id="guide"></div>
+<div id="guide">
+  <input id="search" placeholder="검색 (예: ㄱ, a, 카르)" oninput="searchGuide()">
+  <div id="guideContent"></div>
+</div>
 
 <script>
-// ================== 기본 ==================
+// ===== 한글 분해 =====
 const CHO = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
-
-const JUNG = [
- "ㅏ","ㅐ","ㅑ","ㅒ","ㅓ","ㅔ","ㅕ","ㅖ",
- "ㅗ","ㅘ","ㅙ","ㅚ","ㅛ",
- "ㅜ","ㅝ","ㅞ","ㅟ","ㅠ",
- "ㅡ","ㅢ","ㅣ"
-];
-
+const JUNG = ["ㅏ","ㅐ","ㅑ","ㅒ","ㅓ","ㅔ","ㅕ","ㅖ","ㅗ","ㅘ","ㅙ","ㅚ","ㅛ","ㅜ","ㅝ","ㅞ","ㅟ","ㅠ","ㅡ","ㅢ","ㅣ"];
 const JONG = ["","ㄱ","ㄲ","ㄳ","ㄴ","ㄵ","ㄶ","ㄷ","ㄹ","ㄺ","ㄻ","ㄼ","ㄽ","ㄾ","ㄿ","ㅀ","ㅁ","ㅂ","ㅄ","ㅅ","ㅆ","ㅇ","ㅈ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
 
-// ================== 매핑 ==================
+// ===== 매핑 =====
 const map = {
- "ㄱ":["𐔉","카르"], "ㄲ":["𐔉𐔉","카카르"],
- "ㄴ":["𐔋","나르"], "ㄷ":["𐔌","다르"], "ㄸ":["𐔌𐔌","다다르"],
- "ㄹ":["𐔎","라르"], "ㅁ":["𐔏","마르"], "ㅂ":["𐔐","바르"], "ㅃ":["𐔐𐔐","바바르"],
+ "ㄱ":["𐔉","카르"], "ㄲ":["𐔉𐔉","카카르"], "ㄴ":["𐔋","나르"],
+ "ㄷ":["𐔌","다르"], "ㄸ":["𐔌𐔌","다다르"], "ㄹ":["𐔎","라르"],
+ "ㅁ":["𐔏","마르"], "ㅂ":["𐔐","바르"], "ㅃ":["𐔐𐔐","바바르"],
  "ㅅ":["𐔒","사르"], "ㅆ":["𐔒𐔒","사사르"], "ㅇ":["𐔘","응르"],
  "ㅈ":["𐔕","자르"], "ㅉ":["𐔕𐔕","자자르"], "ㅊ":["𐔖","차르"],
  "ㅋ":["𐔆","카엔"], "ㅌ":["𐔍","타르"], "ㅍ":["𐔑","파르"], "ㅎ":["𐔔","하르"],
 
- "ㅏ":["𐔀","아르"], "ㅑ":["𐔈𐔀","에라"], "ㅓ":["𐔃","오르"],
- "ㅕ":["𐔈𐔃","에로"], "ㅗ":["𐔊","우론"], "ㅛ":["𐔈𐔊","에룬"],
- "ㅜ":["𐔄","우르"], "ㅠ":["𐔈𐔄","에루"], "ㅡ":["𐔈","에르"],
- "ㅣ":["𐔂","이르"], "ㅐ":["𐔅","아엔"], "ㅔ":["𐔁","엔"],
- "ㅚ":["𐔊𐔂","우이르"], "ㅟ":["𐔄𐔂","우이르"], "ㅢ":["𐔈𐔂","에이르"],
- "ㅒ":["𐔈𐔅","에엔"], "ㅖ":["𐔈𐔁","에네"],
- "ㅘ":["𐔊𐔀","우아"], "ㅙ":["𐔊𐔅","우엔"], "ㅝ":["𐔄𐔃","우로"]
+ "ㅏ":["𐔀","아르"], "ㅐ":["𐔅","아엔"], "ㅑ":["𐔈𐔀","에라"],
+ "ㅒ":["𐔈𐔅","에엔"], "ㅓ":["𐔃","오르"], "ㅔ":["𐔁","엔"],
+ "ㅕ":["𐔈𐔃","에로"], "ㅖ":["𐔈𐔁","에네"], "ㅗ":["𐔊","우론"],
+ "ㅘ":["𐔊𐔀","우아"], "ㅙ":["𐔊𐔅","우엔"], "ㅚ":["𐔊𐔂","우이르"],
+ "ㅛ":["𐔈𐔊","에룬"], "ㅜ":["𐔄","우르"], "ㅝ":["𐔄𐔃","우로"],
+ "ㅞ":["𐔄𐔁","우네"], "ㅟ":["𐔄𐔂","우이르"], "ㅠ":["𐔈𐔄","에루"],
+ "ㅡ":["𐔈","에르"], "ㅢ":["𐔈𐔂","에이르"], "ㅣ":["𐔂","이르"]
 };
 
 const engMap = {
@@ -107,11 +103,21 @@ const engMap = {
  "x":"ㅋ","y":"ㅡ","z":"ㅈ"
 };
 
-// 역매핑
-const reverseMap = {};
-for (let k in map) reverseMap[map[k][0]] = k;
+// ===== 문자표 데이터 =====
+let guideData = [];
 
-// ================== 번역 ==================
+function buildGuideData() {
+  guideData = [];
+  for (let k in map) {
+    guideData.push(`${k} = ${map[k][0]} (${map[k][1]})`);
+  }
+  for (let e in engMap) {
+    let k = engMap[e];
+    guideData.push(`${e.toUpperCase()} = ${map[k][0]} (${map[k][1]})`);
+  }
+}
+
+// ===== 번역 =====
 function toNaro() {
   const input = document.getElementById("input").value.toLowerCase();
   let result = "", pron = "";
@@ -150,11 +156,13 @@ function toNaro() {
   pronounce.innerText = "[" + pron.trim() + "]";
 }
 
-// ================== 복원 ==================
+// ===== 복원 =====
 function toKorean() {
   let input = document.getElementById("input").value;
-  let keys = Object.keys(reverseMap).sort((a,b)=>b.length-a.length);
+  let reverseMap = {};
+  for (let k in map) reverseMap[map[k][0]] = k;
 
+  let keys = Object.keys(reverseMap).sort((a,b)=>b.length-a.length);
   keys.forEach(k=>{
     input = input.split(k).join(reverseMap[k]);
   });
@@ -163,47 +171,35 @@ function toKorean() {
   pronounce.innerText = "(복원 완료)";
 }
 
-// ================== 문자표 ==================
+// ===== 문자표 + 검색 =====
 function toggleGuide() {
   const guide = document.getElementById("guide");
 
   if (guide.style.display === "none") {
     guide.style.display = "block";
-
-    guide.innerHTML = `
-    <h3>📖 NARO 문자표</h3>
-
-    <b>🔹 자음</b><br>
-    ㄱ = 𐔉 (카르)<br>
-    ㄴ = 𐔋 (나르)<br>
-    ㄷ = 𐔌 (다르)<br>
-    ㄹ = 𐔎 (라르)<br>
-    ㅁ = 𐔏 (마르)<br>
-    ㅂ = 𐔐 (바르)<br>
-    ㅅ = 𐔒 (사르)<br>
-    ㅇ = 𐔘 (응르)<br><br>
-
-    <b>🔹 모음</b><br>
-    ㅏ = 𐔀 (아르)<br>
-    ㅓ = 𐔃 (오르)<br>
-    ㅗ = 𐔊 (우론)<br>
-    ㅜ = 𐔄 (우르)<br>
-    ㅡ = 𐔈 (에르)<br>
-    ㅣ = 𐔂 (이르)<br><br>
-
-    <b>🔹 영어</b><br>
-    A = 𐔀 (아르)<br>
-    B = 𐔐 (바르)<br>
-    C = 𐔉 (카르)<br>
-    D = 𐔌 (다르)<br>
-    E = 𐔁 (엔)<br>
-    `;
+    buildGuideData();
+    renderGuide(guideData);
   } else {
     guide.style.display = "none";
   }
 }
 
-// ================== 기타 ==================
+function renderGuide(data) {
+  document.getElementById("guideContent").innerHTML =
+    "<b>📖 전체 문자표</b><br><br>" + data.join("<br>");
+}
+
+function searchGuide() {
+  const q = document.getElementById("search").value.toLowerCase();
+
+  const filtered = guideData.filter(line =>
+    line.toLowerCase().includes(q)
+  );
+
+  renderGuide(filtered);
+}
+
+// ===== 기타 =====
 function copyText() {
   navigator.clipboard.writeText(output.innerText);
   alert("복사 완료!");
