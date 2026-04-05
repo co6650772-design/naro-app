@@ -2,21 +2,21 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>NARO ULTRA FINAL</title>
+<title>NARO ABSOLUTE FINAL</title>
 
 <style>
 body { background:#000; color:#fff; text-align:center; font-family:sans-serif; }
 
 textarea {
-  width:70%; height:70px;
-  margin:12px 0;
+  width:65%; height:60px;
+  margin:10px 0;
   border-radius:10px;
   padding:8px;
 }
 
 button {
-  margin:5px;
-  padding:7px 13px;
+  margin:4px;
+  padding:7px 12px;
   border-radius:20px;
   border:none;
   cursor:pointer;
@@ -24,18 +24,18 @@ button {
 
 #output { margin-top:20px; line-height:2.2; }
 
-.word { margin-right:16px; }
+.word { margin-right:15px; }
 
 .charBox {
   display:inline-block;
   margin:3px;
-  padding:6px 8px;
+  padding:5px 7px;
   border-radius:8px;
   background:#111;
 }
 
-.top { font-size:11px; color:#aaa; }
-.bottom { font-size:20px; }
+.top { font-size:10px; color:#aaa; }
+.bottom { font-size:18px; }
 
 .c1{ color:#ff4d4d;}
 .c2{ color:#ffa64d;}
@@ -55,8 +55,8 @@ button {
 }
 
 input {
-  width:65%;
-  padding:8px;
+  width:60%;
+  padding:7px;
   border-radius:10px;
   border:none;
 }
@@ -65,7 +65,7 @@ input {
 
 <body>
 
-<h1>🔥 NARO ULTRA FINAL</h1>
+<h1>🔥 NARO ABSOLUTE FINAL</h1>
 
 <textarea id="input" placeholder="텍스트 입력"></textarea><br>
 
@@ -92,15 +92,17 @@ const CHO=["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","�
 const JUNG=["ㅏ","ㅐ","ㅑ","ㅒ","ㅓ","ㅔ","ㅕ","ㅖ","ㅗ","ㅘ","ㅙ","ㅚ","ㅛ","ㅜ","ㅝ","ㅞ","ㅟ","ㅠ","ㅡ","ㅢ","ㅣ"];
 const JONG=["","ㄱ","ㄲ","ㄳ","ㄴ","ㄵ","ㄶ","ㄷ","ㄹ","ㄺ","ㄻ","ㄼ","ㄽ","ㄾ","ㄿ","ㅀ","ㅁ","ㅂ","ㅄ","ㅅ","ㅆ","ㅇ","ㅈ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
 
+// 1글자 매핑 (완전 수정)
 const korMap={
-"ㄱ":"𐔉","ㄲ":"𐔉𐔉","ㄴ":"𐔋","ㄷ":"𐔌","ㄸ":"𐔌𐔌","ㄹ":"𐔎",
-"ㅁ":"𐔏","ㅂ":"𐔐","ㅃ":"𐔐𐔐","ㅅ":"𐔒","ㅆ":"𐔒𐔒","ㅇ":"𐔘",
-"ㅈ":"𐔕","ㅉ":"𐔕𐔕","ㅊ":"𐔖","ㅋ":"𐔆","ㅌ":"𐔍","ㅍ":"𐔑","ㅎ":"𐔔",
-"ㅏ":"𐔀","ㅐ":"𐔅","ㅑ":"𐔈𐔀","ㅒ":"𐔈𐔅",
-"ㅓ":"𐔃","ㅔ":"𐔁","ㅕ":"𐔈𐔃","ㅖ":"𐔈𐔁",
-"ㅗ":"𐔊","ㅘ":"𐔊𐔀","ㅙ":"𐔊𐔅","ㅚ":"𐔊𐔂",
-"ㅛ":"𐔈𐔊","ㅜ":"𐔄","ㅝ":"𐔄𐔃","ㅞ":"𐔄𐔁","ㅟ":"𐔄𐔂",
-"ㅠ":"𐔈𐔄","ㅡ":"𐔈","ㅢ":"𐔈𐔂","ㅣ":"𐔂"
+"ㄱ":"𐔉","ㄲ":"𐔰","ㄴ":"𐔋","ㄷ":"𐔌","ㄸ":"𐔱","ㄹ":"𐔎",
+"ㅁ":"𐔏","ㅂ":"𐔐","ㅃ":"𐔲","ㅅ":"𐔒","ㅆ":"𐔳","ㅇ":"𐔘",
+"ㅈ":"𐔕","ㅉ":"𐔴","ㅊ":"𐔖","ㅋ":"𐔆","ㅌ":"𐔍","ㅍ":"𐔑","ㅎ":"𐔔",
+
+"ㅏ":"𐔀","ㅐ":"𐔅","ㅑ":"𐔙","ㅒ":"𐔛",
+"ㅓ":"𐔃","ㅔ":"𐔁","ㅕ":"𐔚","ㅖ":"𐔜",
+"ㅗ":"𐔊","ㅘ":"𐔝","ㅙ":"𐔞","ㅚ":"𐔟",
+"ㅛ":"𐔵","ㅜ":"𐔄","ㅝ":"𐔠","ㅞ":"𐔡","ㅟ":"𐔢",
+"ㅠ":"𐔣","ㅡ":"𐔈","ㅢ":"𐔤","ㅣ":"𐔂"
 };
 
 const engMap={
@@ -134,6 +136,7 @@ function toKor(){
 
     [...w].forEach((ch,i)=>{
       let code=ch.charCodeAt(0);
+
       if(code>=44032 && code<=55203){
         let base=code-44032;
         let cho=CHO[Math.floor(base/588)];
@@ -151,6 +154,9 @@ function toKor(){
         });
 
         html+=`</span>`;
+      } else {
+        html+=ch;
+        plain+=ch;
       }
     });
 
@@ -179,6 +185,9 @@ function toEng(){
           <div class="bottom">${engMap[ch]}</div>
         </span>`;
         plain+=engMap[ch];
+      } else {
+        html+=ch;
+        plain+=ch;
       }
     });
 
@@ -188,7 +197,9 @@ function toEng(){
 
   output.innerHTML=html;
   output.dataset.copy=plain;
-  pronounce.innerText="(영어)";
+
+  // ✅ 영어 발음 표시 추가
+  pronounce.innerText="[ "+words.join(" ")+" ]";
 }
 
 // ===== 복원 =====
@@ -206,13 +217,12 @@ function restoreEng(){
   output.innerText=txt;
 }
 
-// ===== 복사 =====
+// ===== 기능 =====
 function copyText(){
   navigator.clipboard.writeText(output.dataset.copy||"");
   alert("복사 완료!");
 }
 
-// ===== 초기화 =====
 function resetAll(){
   input.value="";
   output.innerHTML="";
