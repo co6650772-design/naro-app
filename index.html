@@ -2,39 +2,60 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>NARO ULTIMATE</title>
+<title>NARO FINAL</title>
 
 <style>
-body { background:#000; color:#fff; text-align:center; font-family:sans-serif; }
+body {
+  background:#000;
+  color:#fff;
+  text-align:center;
+  font-family:sans-serif;
+}
 
+/* 🔥 입력창 줄임 */
 textarea {
-  width:85%; height:120px; margin:20px 0;
-  border-radius:10px; padding:10px;
+  width:75%;
+  height:80px;
+  margin:15px 0;
+  border-radius:10px;
+  padding:10px;
+  font-size:15px;
 }
 
 button {
-  margin:5px; padding:10px 15px;
-  border-radius:20px; border:none; cursor:pointer;
+  margin:5px;
+  padding:8px 14px;
+  border-radius:20px;
+  border:none;
+  cursor:pointer;
 }
 
-#output { margin-top:20px; line-height:2.2; }
+/* 출력 */
+#output {
+  margin-top:20px;
+  line-height:2.2;
+}
 
-.word { margin-right:18px; }
+/* 단어 */
+.word {
+  margin-right:18px;
+}
 
+/* 글자 */
 .charBox {
   display:inline-block;
   margin:3px;
-  padding:6px;
+  padding:6px 8px;
   border-radius:8px;
   background:#111;
 }
 
-.stack {
-  display:flex;
-  flex-direction:column;
-  align-items:center;
+/* 🔥 가로 정렬 */
+.inline {
+  display:inline;
 }
 
+/* 색 (글자 단위) */
 .c1{ color:#ff4d4d;}
 .c2{ color:#ffa64d;}
 .c3{ color:#ffff66;}
@@ -42,11 +63,21 @@ button {
 .c5{ color:#66ccff;}
 .c6{ color:#cc66ff;}
 
-.top { font-size:11px; color:#aaa; }
-.bottom { font-size:22px; }
+.top {
+  font-size:11px;
+  color:#aaa;
+}
 
-#pronounce { margin-top:10px; color:#aaa; }
+.bottom {
+  font-size:20px;
+}
 
+#pronounce {
+  margin-top:10px;
+  color:#aaa;
+}
+
+/* 문자표 */
 #guide {
   display:none;
   margin-top:20px;
@@ -55,15 +86,20 @@ button {
   border-radius:10px;
 }
 
-input { width:80%; padding:8px; border-radius:10px; border:none; }
+input {
+  width:70%;
+  padding:8px;
+  border-radius:10px;
+  border:none;
+}
 </style>
 </head>
 
 <body>
 
-<h1>🔥 NARO ULTIMATE</h1>
+<h1>🔥 NARO FINAL</h1>
 
-<textarea id="input" placeholder="입력"></textarea><br>
+<textarea id="input" placeholder="텍스트 입력"></textarea><br>
 
 <button onclick="toKor()">한글 → 나로어</button>
 <button onclick="toEng()">영어 → 나로어</button>
@@ -87,14 +123,24 @@ const CHO = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","
 const JUNG = ["ㅏ","ㅐ","ㅑ","ㅒ","ㅓ","ㅔ","ㅕ","ㅖ","ㅗ","ㅘ","ㅙ","ㅚ","ㅛ","ㅜ","ㅝ","ㅞ","ㅟ","ㅠ","ㅡ","ㅢ","ㅣ"];
 const JONG = ["","ㄱ","ㄲ","ㄳ","ㄴ","ㄵ","ㄶ","ㄷ","ㄹ","ㄺ","ㄻ","ㄼ","ㄽ","ㄾ","ㄿ","ㅀ","ㅁ","ㅂ","ㅄ","ㅅ","ㅆ","ㅇ","ㅈ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
 
-const korMap = { "ㄱ":"𐔉","ㄲ":"𐔉𐔉","ㄴ":"𐔋","ㄷ":"𐔌","ㄸ":"𐔌𐔌","ㄹ":"𐔎","ㅁ":"𐔏","ㅂ":"𐔐","ㅃ":"𐔐𐔐","ㅅ":"𐔒","ㅆ":"𐔒𐔒","ㅇ":"𐔘","ㅈ":"𐔕","ㅉ":"𐔕𐔕","ㅊ":"𐔖","ㅋ":"𐔆","ㅌ":"𐔍","ㅍ":"𐔑","ㅎ":"𐔔",
-"ㅏ":"𐔀","ㅐ":"𐔅","ㅑ":"𐔈𐔀","ㅒ":"𐔈𐔅","ㅓ":"𐔃","ㅔ":"𐔁","ㅕ":"𐔈𐔃","ㅖ":"𐔈𐔁","ㅗ":"𐔊","ㅘ":"𐔊𐔀","ㅙ":"𐔊𐔅","ㅚ":"𐔊𐔂","ㅛ":"𐔈𐔊","ㅜ":"𐔄","ㅝ":"𐔄𐔃","ㅞ":"𐔄𐔁","ㅟ":"𐔄𐔂","ㅠ":"𐔈𐔄","ㅡ":"𐔈","ㅢ":"𐔈𐔂","ㅣ":"𐔂" };
+const korMap = {
+ "ㄱ":"𐔉","ㄲ":"𐔉𐔉","ㄴ":"𐔋","ㄷ":"𐔌","ㄸ":"𐔌𐔌","ㄹ":"𐔎",
+ "ㅁ":"𐔏","ㅂ":"𐔐","ㅃ":"𐔐𐔐","ㅅ":"𐔒","ㅆ":"𐔒𐔒","ㅇ":"𐔘",
+ "ㅈ":"𐔕","ㅉ":"𐔕𐔕","ㅊ":"𐔖","ㅋ":"𐔆","ㅌ":"𐔍","ㅍ":"𐔑","ㅎ":"𐔔",
+ "ㅏ":"𐔀","ㅐ":"𐔅","ㅑ":"𐔈𐔀","ㅒ":"𐔈𐔅",
+ "ㅓ":"𐔃","ㅔ":"𐔁","ㅕ":"𐔈𐔃","ㅖ":"𐔈𐔁",
+ "ㅗ":"𐔊","ㅘ":"𐔊𐔀","ㅙ":"𐔊𐔅","ㅚ":"𐔊𐔂",
+ "ㅛ":"𐔈𐔊","ㅜ":"𐔄","ㅝ":"𐔄𐔃","ㅞ":"𐔄𐔁","ㅟ":"𐔄𐔂",
+ "ㅠ":"𐔈𐔄","ㅡ":"𐔈","ㅢ":"𐔈𐔂","ㅣ":"𐔂"
+};
 
 const engMap = {
- a:"𐔀", b:"𐔁", c:"𐔂", d:"𐔃", e:"𐔄", f:"𐔅", g:"𐔆",
- h:"𐔇", i:"𐔈", j:"𐔉", k:"𐔊", l:"𐔋", m:"𐔌", n:"𐔍",
- o:"𐔎", p:"𐔏", q:"𐔐", r:"𐔑", s:"𐔒", t:"𐔓", u:"𐔔",
- v:"𐔕", w:"𐔖", x:"𐔗", y:"𐔘", z:"𐔙"
+ a:"𐔀", b:"𐔁", c:"𐔂", d:"𐔃", e:"𐔄",
+ f:"𐔅", g:"𐔆", h:"𐔇", i:"𐔈", j:"𐔉",
+ k:"𐔊", l:"𐔋", m:"𐔌", n:"𐔍", o:"𐔎",
+ p:"𐔏", q:"𐔐", r:"𐔑", s:"𐔒", t:"𐔓",
+ u:"𐔔", v:"𐔕", w:"𐔖", x:"𐔗", y:"𐔘",
+ z:"𐔙"
 };
 
 let revKor={}, revEng={};
@@ -105,9 +151,11 @@ function buildReverse(){
   for(let e in engMap) revEng[engMap[e]]=e;
 }
 
-function getColor(i){ return ["c1","c2","c3","c4","c5","c6"][i%6]; }
+function getColor(i){
+  return ["c1","c2","c3","c4","c5","c6"][i%6];
+}
 
-// ===== 한글 변환 =====
+// ===== 한글 → 나로어 (가로) =====
 function toKor(){
   let words=input.value.split(" ");
   let result="", pron="";
@@ -126,14 +174,14 @@ function toKor(){
 
         let parts=[cho,jung,jong].filter(v=>v&&korMap[v]);
 
-        result+=`<span class="charBox ${getColor(i)}"><div class="stack">`;
+        result+=`<span class="charBox ${getColor(i)}">`;
 
         parts.forEach(p=>{
-          result+=`<div>${korMap[p]}</div>`;
+          result+=`<span class="inline">${korMap[p]}</span>`;
           pron+=p+" ";
         });
 
-        result+=`</div></span>`;
+        result+=`</span>`;
       }
     });
 
@@ -144,7 +192,7 @@ function toKor(){
   pronounce.innerText="[ "+pron.trim()+" ]";
 }
 
-// ===== 영어 변환 =====
+// ===== 영어 =====
 function toEng(){
   let words=input.value.toLowerCase().split(" ");
   let result="";
@@ -156,10 +204,8 @@ function toEng(){
       if(engMap[ch]){
         result+=`
         <span class="charBox ${getColor(i)}">
-          <div class="stack">
-            <div class="top">${ch}</div>
-            <div class="bottom">${engMap[ch]}</div>
-          </div>
+          <div class="top">${ch}</div>
+          <div class="bottom">${engMap[ch]}</div>
         </span>`;
       }
     });
@@ -168,21 +214,20 @@ function toEng(){
   });
 
   output.innerHTML=result;
-  pronounce.innerText="(영어)";
 }
 
 // ===== 복원 =====
 function restoreKor(){
   buildReverse();
   let txt=input.value;
-  for(let k in revKor){ txt=txt.split(k).join(revKor[k]); }
+  for(let k in revKor) txt=txt.split(k).join(revKor[k]);
   output.innerText=txt;
 }
 
 function restoreEng(){
   buildReverse();
   let txt=input.value;
-  for(let k in revEng){ txt=txt.split(k).join(revEng[k]); }
+  for(let k in revEng) txt=txt.split(k).join(revEng[k]);
   output.innerText=txt;
 }
 
